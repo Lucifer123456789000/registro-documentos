@@ -1,119 +1,309 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbw8tQZACY8Cv7lquZM6DYB2BatZ-YJcG3tcONM4W2UiT2o_z5ggFIoMeiW6VwlJEfm88w/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzxUT9FQRmAe56gk3vW5l0RHbQRUmJtcMT4JCjiersMPOcM9ECcslw5iWxSVs0Bk_sNxQ/exec";
 
-// Enviar un registro a Google Sheets
-function enviarASheet(registro) {
-  return fetch(SHEET_URL, {
-    method: "POST",
-    body: JSON.stringify(registro),
-    headers: { "Content-Type": "application/json" }
-  });
+
+
+// =====================
+// USUARIO DEL TELEFONO
+// =====================
+
+let usuario = localStorage.getItem("usuario");
+
+
+if(!usuario){
+
+    usuario = prompt(
+        "Ingrese usuario: Moises, Joan o Jidel"
+    );
+
+
+    localStorage.setItem(
+        "usuario",
+        usuario
+    );
+
 }
 
-// Guardar en localStorage como pendiente
-function guardarPendiente(registro) {
-  let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
-  pendientes.push(registro);
-  localStorage.setItem("pendientes", JSON.stringify(pendientes));
+
+document.getElementById("usuario").value = usuario;
+
+
+
+
+// =====================
+// ENVIAR A GOOGLE SHEETS
+// =====================
+
+function enviarASheet(registro){
+
+
+    return fetch(SHEET_URL,{
+
+        method:"POST",
+
+        mode:"no-cors",
+
+        body:JSON.stringify(registro)
+
+    });
+
+
 }
 
-// Sincronizar pendientes cuando hay internet
-function sincronizarPendientes() {
-  let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
-  if (pendientes.length === 0) return;
 
-  let restantes = [];
-  let promesas = pendientes.map(registro =>
-    enviarASheet(registro)
-      .then(res => {
-        if (!res.ok) restantes.push(registro);
-      })
-      .catch(() => restantes.push(registro))
-  );
 
-  Promise.all(promesas).then(() => {
-    localStorage.setItem("pendientes", JSON.stringify(restantes));
-    if (restantes.length < pendientes.length) {
-      mostrarMensaje(`✅ ${pendientes.length - restantes.length} registro(s) pendiente(s) sincronizado(s)`, "verde");
-    }
-  });
+
+
+// =====================
+// GUARDAR SIN INTERNET
+// =====================
+
+function guardarPendiente(registro){
+
+
+    let pendientes =
+    JSON.parse(
+        localStorage.getItem("pendientes") || "[]"
+    );
+
+
+    pendientes.push(registro);
+
+
+    localStorage.setItem(
+        "pendientes",
+        JSON.stringify(pendientes)
+    );
+
+
 }
 
-// Mostrar mensaje de estado
-function mostrarMensaje(texto, color) {
-  let msg = document.getElementById("mensaje");
-  msg.textContent = texto;
-  msg.style.color = color === "verde" ? "green" : "#c0392b";
-  setTimeout(() => msg.textContent = "", 4000);
+
+
+
+
+// =====================
+// MENSAJE
+// =====================
+
+function mostrarMensaje(texto,color){
+
+
+    let mensaje =
+    document.getElementById("mensaje");
+
+
+    mensaje.textContent = texto;
+
+
+    mensaje.style.color = color;
+
+
+    setTimeout(()=>{
+
+        mensaje.textContent="";
+
+    },5000);
+
+
 }
 
-// Al hacer clic en Guardar
-document.getElementById("guardar").addEventListener("click", function () {
-  let usuario  = document.getElementById("usuario").value.trim();
-  let conductor = document.getElementById("conductor").value.trim();
-  let documento = document.getElementById("documento").value.trim();
-  let sucursal  = document.getElementById("sucursal").value.trim();
-  let tipo      = document.getElementById("tipo").value;
 
-  // Validaciones
-  if (!usuario) {
-    mostrarMensaje("⚠️ Selecciona un usuario", "rojo"); return;
-  }
-  if (!conductor) {
-    mostrarMensaje("⚠️ Ingresa el conductor", "rojo"); return;
-  }
-  if (!documento || isNaN(documento) || documento < 0) {
-    mostrarMensaje("⚠️ El documento debe ser solo números", "rojo"); return;
-  }
-  if (!sucursal) {
-    mostrarMensaje("⚠️ Ingresa la sucursal", "rojo"); return;
-  }
-  if (!tipo) {
-    mostrarMensaje("⚠️ Selecciona el tipo de documento", "rojo"); return;
-  }
 
-  // Fecha y hora automática
-  let ahora = new Date();
-  let fecha = ahora.toLocaleDateString("es-VE");
-  let hora  = ahora.toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit" });
 
-  let registro = {
-    fecha,
-    hora,
-    usuario,
-    conductor,
-    documento,
-    sucursal,
-    tipo
-  };
 
-  if (navigator.onLine) {
-    enviarASheet(registro)
-      .then(res => {
-        if (res.ok) {
-          mostrarMensaje("✅ Guardado en Google Sheets", "verde");
-        } else {
-          guardarPendiente(registro);
-          mostrarMensaje("⚠️ Error al enviar, guardado localmente", "rojo");
-        }
-      })
-      .catch(() => {
-        guardarPendiente(registro);
-        mostrarMensaje("📴 Sin conexión, guardado localmente", "rojo");
-      });
-  } else {
-    guardarPendiente(registro);
-    mostrarMensaje("📴 Sin internet, se enviará cuando haya conexión", "rojo");
-  }
+// =====================
+// BOTON GUARDAR
+// =====================
 
-  // Limpiar campos (excepto usuario)
-  document.getElementById("conductor").value = "";
-  document.getElementById("documento").value = "";
-  document.getElementById("sucursal").value = "";
-  document.getElementById("tipo").value = "";
+
+document.getElementById("guardar")
+.addEventListener("click",function(){
+
+
+let conductor =
+document.getElementById("conductor").value.trim();
+
+
+let documento =
+document.getElementById("documento").value.trim();
+
+
+let sucursal =
+document.getElementById("sucursal").value.trim();
+
+
+let tipo =
+document.getElementById("tipo").value;
+
+
+
+if(!conductor){
+
+mostrarMensaje(
+"⚠️ Ingrese conductor",
+"red"
+);
+
+return;
+
+}
+
+
+
+if(!/^[0-9]+$/.test(documento)){
+
+
+mostrarMensaje(
+"⚠️ Documento solo números",
+"red"
+);
+
+
+return;
+
+}
+
+
+
+
+if(!sucursal){
+
+
+mostrarMensaje(
+"⚠️ Ingrese sucursal",
+"red"
+);
+
+
+return;
+
+}
+
+
+
+
+if(!tipo){
+
+
+mostrarMensaje(
+"⚠️ Seleccione tipo",
+"red"
+);
+
+
+return;
+
+}
+
+
+
+
+let fechaHora = new Date();
+
+
+
+let registro={
+
+
+fecha:
+fechaHora.toLocaleDateString("es-NI"),
+
+
+hora:
+fechaHora.toLocaleTimeString("es-NI"),
+
+
+usuario:
+usuario,
+
+
+conductor:
+conductor,
+
+
+documento:
+documento,
+
+
+sucursal:
+sucursal,
+
+
+tipo:
+tipo
+
+
+};
+
+
+
+
+
+// ENVIAR
+
+if(navigator.onLine){
+
+
+
+enviarASheet(registro)
+
+.then(()=>{
+
+
+mostrarMensaje(
+"✅ Enviado a Google Sheets",
+"green"
+);
+
+
+})
+
+.catch(()=>{
+
+
+guardarPendiente(registro);
+
+
+mostrarMensaje(
+"⚠️ Guardado localmente",
+"red"
+);
+
+
 });
 
-// Sincronizar cuando recupera internet
-window.addEventListener("online", sincronizarPendientes);
 
-// Intentar sincronizar al abrir la app
-window.addEventListener("load", sincronizarPendientes);
+
+}else{
+
+
+guardarPendiente(registro);
+
+
+mostrarMensaje(
+"📴 Sin internet",
+"red"
+);
+
+
+}
+
+
+
+
+
+
+// limpiar campos
+
+
+document.getElementById("conductor").value="";
+
+document.getElementById("documento").value="";
+
+document.getElementById("sucursal").value="";
+
+document.getElementById("tipo").value="";
+
+
+
+});

@@ -1,57 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Documentos</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d6efd">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Registros">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Registro de Documentos</title>
+
+<link rel="stylesheet" href="style.css">
+
+<meta name="theme-color" content="#0d6efd">
+
 </head>
+
 <body>
 
 <div class="contenedor">
-    <h1>Registro de Documentos</h1>
 
-    <label>Usuario</label>
-    <select id="usuario">
-        <option value="">-- Seleccionar --</option>
-        <option>Jidel</option>
-        <option>Moises</option>
-        <option>Joan</option>
-    </select>
+<h1>Registro de Documentos</h1>
 
-    <label>Conductor</label>
-    <input type="text" id="conductor" placeholder="Ingrese el conductor">
 
-    <label>Documento (solo números)</label>
-    <input type="number" id="documento" placeholder="Ingrese el número" min="0">
+<label>Usuario</label>
+<input 
+type="text" 
+id="usuario" 
+readonly>
 
-    <label>Sucursal</label>
-    <input type="text" id="sucursal" placeholder="Ingrese la sucursal">
 
-    <label>Tipo de documento</label>
-    <select id="tipo">
-        <option value="">-- Seleccionar --</option>
-        <option>Factura</option>
-        <option>Solicitud de Traslado</option>
-        <option>Débito</option>
-    </select>
+<label>Conductor</label>
+<input 
+type="text" 
+id="conductor"
+placeholder="Ingrese conductor">
 
-    <button id="guardar">Guardar</button>
-    <p id="mensaje" style="text-align:center; font-weight:bold; min-height:24px;"></p>
+
+<label>Documento (solo números)</label>
+<input 
+type="text"
+id="documento"
+inputmode="numeric"
+placeholder="Ingrese número">
+
+
+<label>Sucursal</label>
+<input 
+type="text"
+id="sucursal"
+placeholder="Ingrese sucursal">
+
+
+<label>Tipo de documento</label>
+
+<select id="tipo">
+
+<option value="">
+-- Seleccionar --
+</option>
+
+<option>
+Factura
+</option>
+
+<option>
+Solicitud de Traslado
+</option>
+
+<option>
+Débito
+</option>
+
+</select>
+
+
+<button id="guardar">
+Guardar
+</button>
+
+
+<p id="mensaje"></p>
+
 
 </div>
 
+
 <script src="script.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script>
 
 </body>
 </html>
