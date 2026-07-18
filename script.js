@@ -1,78 +1,196 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzxUT9FQRmAe56gk3vW5l0RHbQRUmJtcMT4JCjiersMPOcM9ECcslw5iWxSVs0Bk_sNxQ/exec";
+const SHEET_URL =
+"https://script.google.com/macros/s/AKfycbzxUT9FQRmAe56gk3vW5l0RHbQRUmJtcMT4JCjiersMPOcM9ECcslw5iWxSVs0Bk_sNxQ/exec";
 
 
 
-// =====================
-// USUARIO DEL TELEFONO
-// =====================
+let db;
 
-let usuario = localStorage.getItem("usuario");
+
+
+// =========================
+// CREAR BASE DE DATOS
+// =========================
+
+
+let abrir = indexedDB.open(
+"RegistroDocumentos",
+1
+);
+
+
+
+abrir.onupgradeneeded=function(e){
+
+db=e.target.result;
+
+
+if(!db.objectStoreNames.contains("registros")){
+
+db.createObjectStore(
+"registros",
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+}
+
+
+};
+
+
+
+abrir.onsuccess=function(e){
+
+db=e.target.result;
+
+sincronizar();
+
+};
+
+
+
+
+
+// =========================
+// USUARIO FIJO
+// =========================
+
+
+let usuario =
+localStorage.getItem("usuario");
 
 
 if(!usuario){
 
-    usuario = prompt(
-        "Ingrese usuario: Moises, Joan o Jidel"
-    );
+usuario=prompt(
+"Ingrese usuario: Moises, Joan o Jidel"
+);
 
 
-    localStorage.setItem(
-        "usuario",
-        usuario
-    );
-
-}
-
-
-document.getElementById("usuario").value = usuario;
-
-
-
-
-// =====================
-// ENVIAR A GOOGLE SHEETS
-// =====================
-
-function enviarASheet(registro){
-
-
-    return fetch(SHEET_URL,{
-
-        method:"POST",
-
-        mode:"no-cors",
-
-        body:JSON.stringify(registro)
-
-    });
+localStorage.setItem(
+"usuario",
+usuario
+);
 
 
 }
 
 
+document.getElementById("usuario").value=usuario;
 
 
 
-// =====================
-// GUARDAR SIN INTERNET
-// =====================
-
-function guardarPendiente(registro){
 
 
-    let pendientes =
-    JSON.parse(
-        localStorage.getItem("pendientes") || "[]"
-    );
+
+// =========================
+// SUCURSALES
+// =========================
 
 
-    pendientes.push(registro);
+const listaSucursales=[
+
+"SV Managua",
+"SV Libertad",
+"SV Terraplaza",
+"SV Santo Domingo",
+"SV Norte",
+"SV Sur",
+"SV Masaya",
+"SV Gourmet",
+"SV Ciudad Sandino"
+
+];
 
 
-    localStorage.setItem(
-        "pendientes",
-        JSON.stringify(pendientes)
-    );
+
+const tipo =
+document.getElementById("tipo");
+
+
+const sucursal =
+document.getElementById("sucursal");
+
+
+const sucursalTexto =
+document.getElementById("sucursalTexto");
+
+
+
+
+tipo.addEventListener("change",()=>{
+
+
+sucursal.innerHTML=
+'<option value="">-- Seleccionar --</option>';
+
+
+
+if(tipo.value==="Solicitud de Traslado"){
+
+
+sucursal.style.display="block";
+
+sucursalTexto.style.display="none";
+
+
+
+listaSucursales.forEach(x=>{
+
+
+let op=document.createElement("option");
+
+op.value=x;
+
+op.textContent=x;
+
+sucursal.appendChild(op);
+
+
+});
+
+
+}else{
+
+
+sucursal.style.display="none";
+
+sucursalTexto.style.display="block";
+
+
+}
+
+
+});
+
+
+
+
+
+
+// =========================
+// GUARDAR EN TELEFONO
+// =========================
+
+
+function guardarTelefono(registro){
+
+
+let tx=db.transaction(
+"registros",
+"readwrite"
+);
+
+
+let tabla=tx.objectStore(
+"registros"
+);
+
+
+tabla.add(registro);
 
 
 }
@@ -81,28 +199,123 @@ function guardarPendiente(registro){
 
 
 
-// =====================
+
+
+// =========================
+// ENVIAR GOOGLE SHEETS
+// =========================
+
+
+function enviarGoogle(registro){
+
+
+return fetch(
+SHEET_URL,
+{
+
+method:"POST",
+
+mode:"no-cors",
+
+body:JSON.stringify(registro)
+
+});
+
+
+}
+
+
+
+
+
+
+// =========================
+// SINCRONIZAR
+// =========================
+
+
+function sincronizar(){
+
+
+if(!navigator.onLine || !db)
+return;
+
+
+
+let tx=db.transaction(
+"registros",
+"readwrite"
+);
+
+
+let tabla=tx.objectStore(
+"registros"
+);
+
+
+
+tabla.openCursor().onsuccess=function(e){
+
+
+let cursor=e.target.result;
+
+
+
+if(cursor){
+
+
+
+enviarGoogle(cursor.value)
+
+.then(()=>{
+
+
+tabla.delete(
+cursor.key
+);
+
+
+});
+
+
+cursor.continue();
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+// =========================
 // MENSAJE
-// =====================
-
-function mostrarMensaje(texto,color){
+// =========================
 
 
-    let mensaje =
-    document.getElementById("mensaje");
+function mensaje(t,c){
 
 
-    mensaje.textContent = texto;
+let m=document.getElementById("mensaje");
+
+m.textContent=t;
+
+m.style.color=c;
 
 
-    mensaje.style.color = color;
+setTimeout(()=>{
 
+m.textContent="";
 
-    setTimeout(()=>{
-
-        mensaje.textContent="";
-
-    },5000);
+},5000);
 
 
 }
@@ -111,66 +324,55 @@ function mostrarMensaje(texto,color){
 
 
 
-// =====================
+
+
+// =========================
 // BOTON GUARDAR
-// =====================
+// =========================
 
 
 document.getElementById("guardar")
-.addEventListener("click",function(){
+.onclick=function(){
 
 
-let conductor =
+
+let conductor=
 document.getElementById("conductor").value.trim();
 
 
-let documento =
+
+let documento=
 document.getElementById("documento").value.trim();
 
 
-let sucursal =
-document.getElementById("sucursal").value.trim();
+
+let suc;
 
 
-let tipo =
-document.getElementById("tipo").value;
+if(tipo.value==="Solicitud de Traslado"){
+
+suc=sucursal.value;
 
 
-
-if(!conductor){
-
-mostrarMensaje(
-"⚠️ Ingrese conductor",
-"red"
-);
-
-return;
-
-}
+}else{
 
 
+suc=sucursalTexto.value.trim();
 
-if(!/^[0-9]+$/.test(documento)){
-
-
-mostrarMensaje(
-"⚠️ Documento solo números",
-"red"
-);
-
-
-return;
 
 }
 
 
 
 
-if(!sucursal){
+if(!conductor ||
+!documento ||
+!suc ||
+!tipo.value){
 
 
-mostrarMensaje(
-"⚠️ Ingrese sucursal",
+mensaje(
+"⚠️ Complete todos los campos",
 "red"
 );
 
@@ -182,23 +384,7 @@ return;
 
 
 
-if(!tipo){
-
-
-mostrarMensaje(
-"⚠️ Seleccione tipo",
-"red"
-);
-
-
-return;
-
-}
-
-
-
-
-let fechaHora = new Date();
+let ahora=new Date();
 
 
 
@@ -206,31 +392,71 @@ let registro={
 
 
 fecha:
-fechaHora.toLocaleDateString("es-NI"),
+ahora.toLocaleDateString("es-NI"),
 
 
 hora:
-fechaHora.toLocaleTimeString("es-NI"),
+ahora.toLocaleTimeString("es-NI"),
 
 
-usuario:
 usuario,
 
 
-conductor:
 conductor,
 
 
-documento:
 documento,
 
 
-sucursal:
-sucursal,
+sucursal:suc,
 
 
-tipo:
-tipo
+tipo:tipo.value
+
+
+};
+
+
+
+
+// SIEMPRE GUARDA EN EL TELEFONO
+
+guardarTelefono(registro);
+
+
+
+mensaje(
+"💾 Guardado en teléfono",
+"green"
+);
+
+
+
+
+// SI HAY INTERNET ENVIA
+
+if(navigator.onLine){
+
+
+sincronizar();
+
+
+}
+
+
+
+
+document.getElementById("conductor").value="";
+
+document.getElementById("documento").value="";
+
+document.getElementById("sucursalTexto").value="";
+
+tipo.value="";
+
+sucursal.innerHTML=
+'<option value="">-- Seleccionar --</option>';
+
 
 
 };
@@ -239,71 +465,7 @@ tipo
 
 
 
-// ENVIAR
-
-if(navigator.onLine){
-
-
-
-enviarASheet(registro)
-
-.then(()=>{
-
-
-mostrarMensaje(
-"✅ Enviado a Google Sheets",
-"green"
+window.addEventListener(
+"online",
+sincronizar
 );
-
-
-})
-
-.catch(()=>{
-
-
-guardarPendiente(registro);
-
-
-mostrarMensaje(
-"⚠️ Guardado localmente",
-"red"
-);
-
-
-});
-
-
-
-}else{
-
-
-guardarPendiente(registro);
-
-
-mostrarMensaje(
-"📴 Sin internet",
-"red"
-);
-
-
-}
-
-
-
-
-
-
-// limpiar campos
-
-
-document.getElementById("conductor").value="";
-
-document.getElementById("documento").value="";
-
-document.getElementById("sucursal").value="";
-
-document.getElementById("tipo").value="";
-
-
-
-});

@@ -1,19 +1,21 @@
 {
   "name": "Registro de Documentos",
   "short_name": "Registros",
+  "description": "Aplicación para registro de documentos",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f2f2f2",
+  "background_color": "#ffffff",
   "theme_color": "#0d6efd",
   "orientation": "portrait",
+
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icono.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon.png",
+      "src": "icono.png",
       "sizes": "512x512",
       "type": "image/png"
     }

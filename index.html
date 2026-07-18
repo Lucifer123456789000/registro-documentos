@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -8,67 +10,68 @@
 
 <link rel="stylesheet" href="style.css">
 
+<link rel="manifest" href="manifest.json">
+
 <meta name="theme-color" content="#0d6efd">
 
 </head>
+
 
 <body>
 
 <div class="contenedor">
 
+
 <h1>Registro de Documentos</h1>
 
 
 <label>Usuario</label>
-<input 
-type="text" 
-id="usuario" 
-readonly>
+<input id="usuario" type="text" readonly>
+
 
 
 <label>Conductor</label>
-<input 
-type="text" 
-id="conductor"
-placeholder="Ingrese conductor">
+<input id="conductor" type="text" placeholder="Ingrese conductor">
+
 
 
 <label>Documento (solo números)</label>
-<input 
-type="text"
-id="documento"
-inputmode="numeric"
-placeholder="Ingrese número">
+<input id="documento" type="text" inputmode="numeric" placeholder="Ingrese número">
 
-
-<label>Sucursal</label>
-<input 
-type="text"
-id="sucursal"
-placeholder="Ingrese sucursal">
 
 
 <label>Tipo de documento</label>
 
 <select id="tipo">
 
-<option value="">
--- Seleccionar --
-</option>
+<option value="">-- Seleccionar --</option>
 
-<option>
-Factura
-</option>
+<option>Factura</option>
 
-<option>
-Solicitud de Traslado
-</option>
+<option>Solicitud de Traslado</option>
 
-<option>
-Débito
-</option>
+<option>Débito</option>
 
 </select>
+
+
+
+
+<label>Sucursal</label>
+
+<select id="sucursal">
+
+<option value="">-- Seleccionar --</option>
+
+</select>
+
+
+<input 
+id="sucursalTexto"
+type="text"
+placeholder="Ingrese sucursal"
+>
+
 
 
 <button id="guardar">
@@ -82,7 +85,23 @@ Guardar
 </div>
 
 
+
 <script src="script.js"></script>
 
+
+<script>
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register(
+"service-worker.js"
+);
+
+}
+
+</script>
+
+
 </body>
+
 </html>
