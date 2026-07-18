@@ -16,21 +16,33 @@
 <div class="contenedor">
     <h1>Registro de Documentos</h1>
 
-    <label>Conductor</label>
-    <input type="text" id="conductor" placeholder="Ingrese el nombre">
+    <label>Usuario</label>
+    <select id="usuario">
+        <option value="">-- Seleccionar --</option>
+        <option>Jidel</option>
+        <option>Moises</option>
+        <option>Joan</option>
+    </select>
 
-    <label>Documento</label>
-    <input type="text" id="documento" placeholder="Ingrese el documento">
+    <label>Conductor</label>
+    <input type="text" id="conductor" placeholder="Ingrese el conductor">
+
+    <label>Documento (solo números)</label>
+    <input type="number" id="documento" placeholder="Ingrese el número" min="0">
+
+    <label>Sucursal</label>
+    <input type="text" id="sucursal" placeholder="Ingrese la sucursal">
 
     <label>Tipo de documento</label>
     <select id="tipo">
+        <option value="">-- Seleccionar --</option>
         <option>Factura</option>
-        <option>ST</option>
+        <option>Solicitud de Traslado</option>
         <option>Débito</option>
-        <option>Crédito</option>
     </select>
 
     <button id="guardar">Guardar</button>
+    <p id="mensaje" style="text-align:center; font-weight:bold; min-height:24px;"></p>
 
 </div>
 
