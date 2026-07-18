@@ -233,61 +233,37 @@ body:JSON.stringify(registro)
 // SINCRONIZAR
 // =========================
 
-
 function sincronizar(){
 
+  if(!navigator.onLine || !db) return;
 
-if(!navigator.onLine || !db)
-return;
+  let tx = db.transaction("registros", "readonly");
+  let tabla = tx.objectStore("registros");
+  let todos = tabla.getAll();
 
+  todos.onsuccess = function(e){
+    let registros = e.target.result;
+    if(registros.length === 0) return;
 
+    // Enviar uno por uno y eliminar solo si fue exitoso
+    registros.forEach(registro => {
 
-let tx=db.transaction(
-"registros",
-"readwrite"
-);
+      fetch(SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(registro)
+      })
+      .then(() => {
+        // Eliminar de IndexedDB después de enviar
+        let tx2 = db.transaction("registros", "readwrite");
+        tx2.objectStore("registros").delete(registro.id);
+      })
+      .catch(() => {
+        // Si falla, no eliminar — se reintentará después
+      });
 
-
-let tabla=tx.objectStore(
-"registros"
-);
-
-
-
-tabla.openCursor().onsuccess=function(e){
-
-
-let cursor=e.target.result;
-
-
-
-if(cursor){
-
-
-
-enviarGoogle(cursor.value)
-
-.then(()=>{
-
-
-tabla.delete(
-cursor.key
-);
-
-
-});
-
-
-cursor.continue();
-
-
-}
-
-
-
-};
-
-
+    });
+  };
 
 }
 
